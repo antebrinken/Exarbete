@@ -19,6 +19,7 @@ app.get('/health', (_req, res) => {
 })
 
 app.post('/api/travel-plan', async (req, res) => {
+  console.log('Received travel-plan request:', req.body);
   try {
     if (!openai) {
       return res.status(500).json({ error: 'Missing OPENAI_API_KEY in environment' })
@@ -38,21 +39,16 @@ app.post('/api/travel-plan', async (req, res) => {
       interests: formData.interests ?? [],
     })
 
-    const completion = await openai.responses.create({
-      model: 'gpt-4.1-mini',
-      input: prompt,
+    // Replace the OpenAI call with the correct chat completion format
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [
+        { role: 'system', content: 'Du är en hjälpsam reseplanerare.' },
+        { role: 'user', content: prompt }
+      ],
     })
 
-    const outputArray = Array.isArray((completion as unknown as { output?: any[] }).output)
-      ? (completion as unknown as { output?: any[] }).output
-      : undefined
-
-    const text =
-      completion.output_text?.[0] ??
-      outputArray
-        ?.flatMap((item) => (item && 'content' in item ? (item as any).content ?? [] : []))
-        .find((c: any) => c && c.type === 'text')?.text ??
-      ''
+    const text = completion.choices?.[0]?.message?.content?.trim() || '';
 
     if (!text) {
       return res.status(502).json({ error: 'Empty response from AI' })
@@ -60,16 +56,28 @@ app.post('/api/travel-plan', async (req, res) => {
 
     let plan: TravelPlan
     try {
-      plan = JSON.parse(text)
+      // Attempt to extract JSON object from the text
+      const jsonMatch = text.match(/\{[\s\S]*\}/)
+      if (!jsonMatch) {
+        return res.status(502).json({
+          error: 'AI response did not contain a JSON object',
+          raw: text,
+        })
+      }
+      plan = JSON.parse(jsonMatch[0])
     } catch (parseError) {
-      return res.status(502).json({ error: 'Failed to parse AI response as JSON' })
+      return res.status(502).json({
+        error: 'Failed to parse AI response as JSON',
+        raw: text,
+      })
     }
 
     return res.json(plan)
   } catch (error) {
     // eslint-disable-next-line no-console
-    console.error('Error generating travel plan', error)
-    return res.status(500).json({ error: 'Failed to generate travel plan' })
+    console.error('Travel plan error:', error);
+    const message = error instanceof Error ? error.message : 'Failed to generate travel plan'
+    return res.status(500).json({ error: message })
   }
 })
 
