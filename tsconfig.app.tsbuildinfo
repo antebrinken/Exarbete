@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/services/aiplanner.ts","./src/services/api.ts","./src/services/promptbuilder.ts","./src/types/forms.ts","./src/types/responses.ts","./src/types/travel.ts"],"version":"5.9.3"}

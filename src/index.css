@@ -1,0 +1,10 @@
+@import "tailwindcss/preflight";
+@import "tailwindcss/utilities";
+
+body {
+  background-color: #020617;
+  color: #f8fafc;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
