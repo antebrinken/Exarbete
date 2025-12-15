@@ -10,13 +10,17 @@ export async function generateTravelPlan(formData: TravelFormData): Promise<Trav
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(formData),
-  })
-
+  });
   if (!res.ok) {
-    throw new Error('Failed to generate travel plan')
+    throw new Error('Failed to generate travel plan');
   }
-
-  const data = await res.json()
-  return data as TravelPlan
+  const data = await res.json();
+  return data as TravelPlan;
 }
+
+export async function regenerateDay(formData: TravelFormData): Promise<import("../types/travel").TravelPlanDay> {
+  const plan = await generateTravelPlan(formData);
+  return plan.days[0];
+}
+
 
