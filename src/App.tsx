@@ -543,8 +543,9 @@ const [dirty, setDirty] = useState(false);
   return (
     <main className="mx-auto flex max-w-6xl flex-col gap-10 px-4 py-16 sm:py-20">
       <div className="space-y-3">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-200/80">
-          AI travel plan
+        <h1 className="text-3xl font-bold sm:text-4xl" onClick={() => setEditField('header')} title="Click to edit" style={{ cursor: 'pointer', textDecoration: 'underline dotted' }}>Results</h1>
+        <p className="max-w-2xl text-slate-300">
+          Results of the planned trips
         </p>
         {editField === 'header' ? (
           <div className="space-y-2 bg-slate-800 p-3 rounded">
@@ -568,9 +569,6 @@ const [dirty, setDirty] = useState(false);
         ) : (
           <h1 className="text-3xl font-bold sm:text-4xl" onClick={() => setEditField('header')} title="Click to edit" style={{ cursor: 'pointer', textDecoration: 'underline dotted' }}>Your itinerary overview</h1>
         )}
-        <p className="max-w-2xl text-slate-300">
-          Timeline of days, activities, packing list, and tips. Replace this sample with real AI output when ready.
-        </p>
         <button
           className="rounded-lg border border-indigo-300 bg-indigo-500 px-4 py-2 text-white mt-3 font-semibold hover:bg-indigo-600 mr-3"
           onClick={downloadPDF}
