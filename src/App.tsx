@@ -1,12 +1,16 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import SharedTripPage from './SharedTripPage'
+import ShareTripButton from './ShareTripButton'
+import PrintTripPage from './PrintTripPage'
+import RemoteResultsPage from './RemoteResultsPage'
+import ShareRemoteButton from './ShareRemoteButton'
 import type { FormEvent } from 'react'
 import { Link, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { generateTravelPlan } from './services/api'
 import type { TravelFormData } from './types/forms'
-import type { TravelPlan } from './types/travel'
 import LoginForm from './LoginForm';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import "leaflet/dist/leaflet.css";
+import MapView from './MapView';
 
 const navLinks = [
   { label: 'Home', to: '/' },
@@ -119,110 +123,23 @@ function Footer() {
   )
 }
 
-function HeroPreview() {
-  return (
-    <div className="relative">
-      <div className="absolute inset-0 -z-10 translate-x-6 translate-y-6 rounded-3xl bg-indigo-500/20 blur-3xl" />
-      <div className="overflow-hidden rounded-3xl border border-white/10 bg-slate-900/70 shadow-2xl shadow-indigo-500/20 backdrop-blur">
-        <div className="border-b border-white/5 bg-slate-900/90 px-6 py-4">
-          <div className="flex items-center gap-2 text-xs font-semibold text-slate-300">
-            <span className="h-2 w-2 rounded-full bg-emerald-400" />
-            <span className="h-2 w-2 rounded-full bg-amber-400" />
-            <span className="h-2 w-2 rounded-full bg-rose-400" />
-            <span className="ml-2 text-slate-200">Preview</span>
-          </div>
-        </div>
-        <div className="space-y-4 px-6 py-6">
-          <div className="rounded-xl border border-white/5 bg-slate-900/80 p-4">
-            <p className="text-sm font-semibold text-white">Header</p>
-            <p className="text-xs text-slate-400">
-              Sticky top bar with nav, CTA, and branding.
-            </p>
-          </div>
-          <div className="rounded-xl border border-white/5 bg-slate-900/80 p-4">
-            <p className="text-sm font-semibold text-white">Hero</p>
-            <p className="text-xs text-slate-400">
-              Responsive grid with headline, body, and action buttons.
-            </p>
-          </div>
-          <div className="rounded-xl border border-white/5 bg-slate-900/80 p-4">
-            <p className="text-sm font-semibold text-white">Footer</p>
-            <p className="text-xs text-slate-400">
-              Links and meta info with muted contrast.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 function HomePage() {
   return (
-    <main className="mx-auto flex max-w-6xl flex-col gap-16 px-4 py-16 sm:py-24">
-      <section className="grid items-center gap-12 md:grid-cols-2">
-        <div className="space-y-6">
-          <p className="inline-flex items-center gap-2 rounded-full bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-indigo-100 ring-1 ring-white/10">
-            New
-            <span className="text-white">Tailwind frontpage template</span>
-          </p>
-          <div className="space-y-4">
-            <h1 className="text-4xl font-bold leading-tight sm:text-5xl">
-              Build your next landing page faster with Tailwind CSS.
-            </h1>
-            <p className="text-lg text-slate-300">
-              Pre-styled sections, responsive layout, and a clean starting point so you
-              can focus on your product—not boilerplate.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <Link
-              to="/planner"
-              className="rounded-lg bg-indigo-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition hover:bg-indigo-400"
-            >
-              Try the planner
-            </Link>
-            <button className="rounded-lg border border-white/10 px-5 py-3 text-sm font-semibold text-slate-100 transition hover:border-white/20 hover:bg-white/5">
-              View demo
-            </button>
-            <p className="text-xs text-slate-400">No credit card required.</p>
-          </div>
-          <div className="flex items-center gap-6 text-sm text-slate-300">
-            <div className="flex items-center gap-2">
-              <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
-              Live updates
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="h-2.5 w-2.5 rounded-full bg-indigo-400" />
-              TypeScript ready
-            </div>
-          </div>
-        </div>
-        <HeroPreview />
-      </section>
-
-      <section
-        id="features"
-        className="grid gap-6 rounded-2xl border border-white/5 bg-slate-900/60 p-8 shadow-xl shadow-indigo-500/10 md:grid-cols-3"
+    <main className="mx-auto flex max-w-2xl flex-col items-center justify-center px-4 py-32 sm:py-40 text-center">
+      <h1 className="text-4xl font-bold leading-tight text-white mb-6 sm:text-5xl">
+        Plan Your Dream Trip &mdash; Effortlessly
+      </h1>
+      <p className="text-lg text-slate-300 mb-8 max-w-xl">
+        This app helps you save both <b>time</b> and <b>money</b> while getting the trip of a lifetime 
+        together with your loved ones. Discover how seamless travel planning can be&mdash;one click, and you’ll have a customized adventure with zero headaches, less cost, and amazing memories.
+      </p>
+      <Link
+        to="/planner"
+        className="rounded-lg bg-indigo-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition hover:bg-indigo-400"
       >
-        {['Responsive by default', 'Utility-first workflow', 'Accessible components'].map(
-          (feature, idx) => (
-            <article
-              key={feature}
-              className="space-y-3 rounded-xl border border-white/5 bg-slate-900/70 p-5"
-            >
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-500/20 text-sm font-semibold text-indigo-100">
-                0{idx + 1}
-              </div>
-              <h3 className="text-lg font-semibold">{feature}</h3>
-              <p className="text-sm text-slate-300">
-                Ship polished UI faster using Tailwind utilities and sensible defaults tuned
-                for modern products.
-              </p>
-            </article>
-          ),
-        )}
-      </section>
+        Start planning your trip
+      </Link>
     </main>
   )
 }
@@ -299,10 +216,10 @@ function PlannerPage() {
                 className="w-full rounded-lg border border-white/10 bg-slate-900/80 px-3 py-2 text-sm text-white focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/40"
                 defaultValue="mid"
               >
-                <option value="shoestring">Shoestring</option>
-                <option value="mid">Mid-range</option>
-                <option value="premium">Premium</option>
-                <option value="luxury">Luxury</option>
+                <option value="0-5000">0–5 000 SEK</option>
+                <option value="5000-15000">5 000–15 000 SEK</option>
+                <option value="15000-30000">15 000–30 000 SEK</option>
+                <option value="30000plus">30 000+ SEK</option>
               </select>
             </div>
             <div className="space-y-2">
@@ -427,33 +344,41 @@ const samplePlan: TravelPlan = {
   destination: 'Kyoto, Japan',
   startDate: '2025-04-12',
   endDate: '2025-04-15',
-  budget: 'mid',
+  budget: '5000-15000',
   interests: ['food', 'museums', 'outdoors'],
   travelers: 'Couple',
   days: [
     {
       date: '2025-04-12',
-      morning: 'Arrive, drop bags at hotel, coffee near Nishiki Market.',
-      afternoon: 'Explore Nishiki Market and sample local street food.',
-      evening: 'Gion district stroll and dinner at a teahouse.',
+      activities: [
+        { id: '1', label: 'morning', text: 'Arrive, drop bags at hotel, coffee near Nishiki Market.', source: 'ai', placeQuery: 'Nishiki Market, Kyoto' },
+        { id: '2', label: 'afternoon', text: 'Explore Nishiki Market and sample local street food.', source: 'ai', placeQuery: 'Nishiki Market, Kyoto' },
+        { id: '3', label: 'evening', text: 'Gion district stroll and dinner at a teahouse.', source: 'ai', placeQuery: 'Gion, Kyoto' }
+      ]
     },
     {
       date: '2025-04-13',
-      morning: 'Visit Fushimi Inari early to beat crowds.',
-      afternoon: 'Cycle along Kamo River and stop at local cafés.',
-      evening: 'Pontocho alley yakitori and river views.',
+      activities: [
+        { id: '4', label: 'morning', text: 'Visit Fushimi Inari early to beat crowds.', source: 'ai', placeQuery: 'Fushimi Inari Taisha, Kyoto' },
+        { id: '5', label: 'afternoon', text: 'Cycle along Kamo River and stop at local cafés.', source: 'ai', placeQuery: 'Kamo River, Kyoto' },
+        { id: '6', label: 'evening', text: 'Pontocho alley yakitori and river views.', source: 'ai', placeQuery: 'Pontocho, Kyoto' }
+      ]
     },
     {
       date: '2025-04-14',
-      morning: 'Philosopher’s Path walk and temples.',
-      afternoon: 'Arashiyama bamboo grove + Tenryuji gardens.',
-      evening: 'Onsen and relaxed izakaya dinner.',
+      activities: [
+        { id: '7', label: 'morning', text: 'Philosopher’s Path walk and temples.', source: 'ai', placeQuery: 'Philosopher’s Path, Kyoto' },
+        { id: '8', label: 'afternoon', text: 'Arashiyama bamboo grove + Tenryuji gardens.', source: 'ai', placeQuery: 'Arashiyama Bamboo Grove, Kyoto' },
+        { id: '9', label: 'evening', text: 'Onsen and relaxed izakaya dinner.', source: 'ai' }
+      ]
     },
     {
       date: '2025-04-15',
-      morning: 'Souvenir stop; pack.',
-      afternoon: 'Check-out and head to Kansai Airport.',
-      evening: 'Flight home.',
+      activities: [
+        { id: '10', label: 'morning', text: 'Souvenir stop; pack.', source: 'ai' },
+        { id: '11', label: 'afternoon', text: 'Check-out and head to Kansai Airport.', source: 'ai', placeQuery: 'Kansai Airport' },
+        { id: '12', label: 'evening', text: 'Flight home.', source: 'ai' }
+      ]
     },
   ],
   packingList: [
@@ -510,27 +435,52 @@ function ProfilePage() {
   );
 }
 
+import { geocode } from './services/geocode';
+import type { ActivityItem, PlanDay, TravelPlan } from './types/travel';
+
 function ResultsPage() {
-  const location = useLocation()
+  const location = useLocation();
   const origPlan = (location.state as { plan?: TravelPlan } | null)?.plan ?? samplePlan;
   const [plan, setPlan] = useState(origPlan);
-const [editField, setEditField] = useState<string | { dayIdx: number, part: 'morning' | 'afternoon' | 'evening' } | null>(null);
-const [editValue, setEditValue] = useState('');
-const [regenerating, setRegenerating] = useState(false);
-const [dirty, setDirty] = useState(false);
+  const [editField, setEditField] = useState<null | { dayIdx: number, activityIdx: number }>(null);
+  const [editValue, setEditValue] = useState('');
+  const [regenerating, setRegenerating] = useState(false);
+  const [dirty, setDirty] = useState(false);
+  const [selectedActivityId, setSelectedActivityId] = useState<string | null>(null);
+  const activityRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  // PDF Export
-  const downloadPDF = async () => {
-    const input = document.getElementById('plan-to-pdf')
-    if (!input) return
-    const canvas = await html2canvas(input, { scale: 2 })
-    const imgData = canvas.toDataURL('image/png')
-    const pdf = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' })
-    const width = pdf.internal.pageSize.getWidth()
-    const height = (canvas.height * width) / canvas.width
-    pdf.addImage(imgData, 'PNG', 0, 0, width, height)
-    pdf.save(`${plan.destination}-Trip.pdf`)
-  }
+  // Geocode activities on first mount
+  useEffect(() => {
+    async function enrichPlanWithCoords(orig: TravelPlan) {
+      let changed = false;
+      const days: PlanDay[] = await Promise.all(orig.days.map(async (day) => {
+        const activities: ActivityItem[] = await Promise.all(day.activities.map(async (activity) => {
+          if ((activity.lat && activity.lng) || !(activity.placeQuery || activity.text)) return activity;
+          const query = activity.placeQuery || activity.text;
+          const coords = await geocode(query, orig.destination);
+          if (coords) {
+            changed = true;
+            return { ...activity, lat: coords.lat, lng: coords.lng };
+          }
+          return activity;
+        }));
+        return { ...day, activities };
+      }));
+      if (changed) {
+        const updatedPlan = { ...orig, days };
+        setPlan(updatedPlan);
+        // Save to localStorage (update saved trip immediately)
+        const savedTrips = JSON.parse(localStorage.getItem('savedTrips') || '[]');
+        const idx = savedTrips.findIndex((t: TravelPlan) => t.destination === updatedPlan.destination && t.startDate === updatedPlan.startDate && t.endDate === updatedPlan.endDate);
+        if (idx !== -1) savedTrips[idx] = updatedPlan;
+        else savedTrips.push(updatedPlan);
+        localStorage.setItem('savedTrips', JSON.stringify(savedTrips));
+      }
+    }
+    enrichPlanWithCoords(plan);
+    // Only run once on mount unless plan changes type
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Save to Profile
   const saveToProfile = () => {
@@ -542,45 +492,35 @@ const [dirty, setDirty] = useState(false);
 
   return (
     <main className="mx-auto flex max-w-6xl flex-col gap-10 px-4 py-16 sm:py-20">
-      <div className="space-y-3">
-        <h1 className="text-3xl font-bold sm:text-4xl" onClick={() => setEditField('header')} title="Click to edit" style={{ cursor: 'pointer', textDecoration: 'underline dotted' }}>Results</h1>
-        <p className="max-w-2xl text-slate-300">
-          Results of the planned trips
+      <div className="space-y-3 mt-3 mb-5 text-center">
+        <h1 className="text-4xl font-extrabold text-white tracking-tight mb-3" style={{ cursor: 'pointer' }} onClick={() => setEditField(null)} title="Click to edit">
+          Din Resplan
+        </h1>
+        <p className="max-w-2xl mx-auto text-lg text-slate-300">
+          Här får du en dag-för-dag-resplan skräddarsydd för dig. Klicka på "Din Resplan" för att redigera!
         </p>
-        {editField === 'header' ? (
-          <div className="space-y-2 bg-slate-800 p-3 rounded">
-            <label className="block mb-1 text-white">Destination
-              <input value={plan.destination} onChange={e => setPlan({ ...plan, destination: e.target.value })} className="mb-1 w-full rounded px-2 py-1" />
-            </label>
-            <label className="block mb-1 text-white">Budget
-              <select value={plan.budget} onChange={e => setPlan({ ...plan, budget: e.target.value as typeof plan.budget })} className="mb-1 w-full rounded px-2 py-1">
-                {(['shoestring', 'mid', 'premium', 'luxury'] as const).map(b => <option key={b}>{b}</option>)}
-              </select>
-            </label>
-            <label className="block mb-1 text-white">Interests
-              <input value={plan.interests.join(', ')} onChange={e => setPlan({ ...plan, interests: e.target.value.split(/,\s*/) })} className="mb-1 w-full rounded px-2 py-1" />
-            </label>
-            <label className="block mb-1 text-white">Travelers
-              <input value={plan.travelers ?? ''} onChange={e => setPlan({ ...plan, travelers: e.target.value })} className="mb-1 w-full rounded px-2 py-1" />
-            </label>
-            <button type="button" className="bg-green-500 text-white px-3 py-1 rounded mr-2" onClick={() => { setEditField(null); setDirty(true); }}>Save</button>
-            <button type="button" className="bg-gray-400 text-white px-3 py-1 rounded" onClick={() => setEditField(null)}>Cancel</button>
-          </div>
-        ) : (
-          <h1 className="text-3xl font-bold sm:text-4xl" onClick={() => setEditField('header')} title="Click to edit" style={{ cursor: 'pointer', textDecoration: 'underline dotted' }}>Your itinerary overview</h1>
-        )}
         <button
           className="rounded-lg border border-indigo-300 bg-indigo-500 px-4 py-2 text-white mt-3 font-semibold hover:bg-indigo-600 mr-3"
-          onClick={downloadPDF}
+          onClick={() => {
+            let tripId = (plan as unknown as { _sharedId?: string })._sharedId || null;
+            if (!tripId) {
+              tripId = (Math.random().toString(36).slice(2,10));
+              (plan as unknown as { _sharedId?: string })._sharedId = tripId;
+              localStorage.setItem('trip-' + tripId, JSON.stringify(plan));
+            }
+            window.open(`/trip/${tripId}/print`, '_blank');
+          }}
         >
-          Save as PDF
+          Exportera som PDF
         </button>
         <button
-          className="rounded-lg border border-green-300 bg-green-500 px-4 py-2 text-white mt-3 font-semibold hover:bg-green-600"
+          className="rounded-lg border border-green-300 bg-green-500 px-4 py-2 text-white mt-3 font-semibold hover:bg-green-600 mr-3"
           onClick={saveToProfile}
         >
           Save to Profile
         </button>
+        <ShareTripButton plan={plan} />
+        <ShareRemoteButton plan={plan} />
       </div>
 
       {dirty && (
@@ -605,6 +545,26 @@ const [dirty, setDirty] = useState(false);
       )}
       <section id="plan-to-pdf" className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="space-y-6 rounded-2xl border border-white/5 bg-slate-900/60 p-6 shadow-xl shadow-indigo-500/10">
+          {/* Map View for this trip */}
+          <div>
+            <h3 className="text-lg font-bold mb-2 text-indigo-200">Karta över resmål</h3>
+            <MapView
+              center={[35.0116, 135.7681]} // fallback center
+              markers={plan.days.flatMap(day => day.activities.filter(a => typeof a.lat === 'number' && typeof a.lng === 'number').map(a => ({
+                id: a.id,
+                position: [a.lat!, a.lng!],
+                popup: <span>{a.text}</span>
+              })))}
+              selectedId={selectedActivityId ?? undefined}
+              height="325px"
+              onMarkerClick={id => {
+                setSelectedActivityId(id);
+                setTimeout(() => {
+                  activityRefs.current[id]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+              }}
+            />
+          </div>
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-slate-300">Destination</p>
@@ -655,10 +615,14 @@ const [dirty, setDirty] = useState(false);
       }} className="ml-2 text-xs bg-blue-100 px-2 py-0.5 rounded text-blue-800">{regenerating ? 'Regenerating...' : 'Regenerate'}</button>
     </div>
     <div className="space-y-2">
-      {(['morning','afternoon','evening'] as const).map(part => (
-        <div key={part} className="rounded-lg border border-white/5 bg-slate-900/70 p-3">
-          <p className="text-xs uppercase tracking-wide text-slate-400">{part.charAt(0).toUpperCase() + part.slice(1)}</p>
-          {editField && typeof editField === 'object' && editField.dayIdx === idx && editField.part === part ? (
+      {day.activities.map((activity, activityIdx) => (
+        <div
+          key={activity.id}
+          ref={el => { activityRefs.current[activity.id] = el; }}
+          className={`rounded-lg border bg-slate-900/70 p-3 ${selectedActivityId===activity.id ? 'border-indigo-400 shadow-lg' : 'border-white/5'}`}
+        >
+          <p className="text-xs uppercase tracking-wide text-slate-400">{activity.label.charAt(0).toUpperCase() + activity.label.slice(1)}</p>
+          {editField && editField.dayIdx === idx && editField.activityIdx === activityIdx ? (
             <>
               <textarea
                 className="text-sm text-slate-900 bg-white rounded px-2 py-1 w-full"
@@ -669,7 +633,7 @@ const [dirty, setDirty] = useState(false);
               <button className="text-xs mr-2 mt-1 bg-green-200 text-green-900 rounded px-2 py-0.5"
                 onClick={() => {
                   const newDays = [...plan.days];
-                  newDays[idx] = { ...newDays[idx], [part]: editValue };
+                  newDays[idx].activities[activityIdx] = { ...activity, text: editValue };
                   setPlan({ ...plan, days: newDays });
                   setEditField(null);
                   setDirty(true);
@@ -683,9 +647,10 @@ const [dirty, setDirty] = useState(false);
             </>
           ) : (
             <p
-              className="text-sm text-slate-100 cursor-pointer hover:underline"
-              onClick={() => { setEditField({dayIdx: idx, part}); setEditValue(day[part]); }}>
-              {day[part]}
+              className={`text-sm cursor-pointer hover:underline ${selectedActivityId===activity.id ? 'text-indigo-200 font-semibold' : 'text-slate-100'}`}
+              onClick={() => { setSelectedActivityId(activity.id); setEditField({ dayIdx: idx, activityIdx }); setEditValue(activity.text); }}
+            >
+              {activity.text}
             </p>
           )}
         </div>
@@ -794,6 +759,9 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/planner" element={<PlannerPage />} />
         <Route path="/planner/results" element={<ResultsPage />} />
+        <Route path="/trip/:id/print" element={<PrintTripPage />} />
+        <Route path="/trip/:id" element={<SharedTripPage />} />
+        <Route path="/shared/:id" element={<RemoteResultsPage />} />
         <Route path="/login" element={<LoginForm />} />
         <Route path="/profile" element={<ProfilePage />} />
       </Routes>

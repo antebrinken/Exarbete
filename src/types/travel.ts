@@ -1,32 +1,41 @@
-export type BudgetLevel = 'shoestring' | 'mid' | 'premium' | 'luxury'
+export type BudgetLevel = '0-5000' | '5000-15000' | '15000-30000' | '30000plus'
 
-export interface TravelPlanDay {
-  date: string
-  morning: string
-  afternoon: string
-  evening: string
+export interface ActivityItem {
+  id: string;
+  label: "morning" | "afternoon" | "evening";
+  text: string;
+  source: "ai" | "user";
+  placeQuery?: string; // E.g. “Sagrada Familia, Barcelona”
+  lat?: number;
+  lng?: number;
+}
+
+export interface PlanDay {
+  date: string;
+  activities: ActivityItem[];
 }
 
 export interface TravelPlan {
-  destination: string
-  startDate: string
-  endDate: string
-  budget: BudgetLevel
-  interests: string[]
-  travelers?: string
-  days: TravelPlanDay[]
-  packingList: string[]
-  tips: string[]
+  destination: string;
+  startDate: string;
+  endDate: string;
+  budget: BudgetLevel;
+  interests: string[];
+  travelers?: string;
+  days: PlanDay[];
+  packingList: string[];
+  tips: string[];
   reservations?: Array<{
-    type: 'flight' | 'train' | 'hotel' | 'restaurant' | 'activity'
-    name: string
-    time?: string
-    address?: string
-    confirmation?: string
-  }>
-  transportNotes?: string[]
-  safetyNotes?: string[]
+    type: 'flight' | 'train' | 'hotel' | 'restaurant' | 'activity';
+    name: string;
+    time?: string;
+    address?: string;
+    confirmation?: string;
+  }>;
+  transportNotes?: string[];
+  safetyNotes?: string[];
 }
+
 
 export interface TravelPlanRequest {
   destination: string

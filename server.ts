@@ -65,6 +65,13 @@ app.post('/api/travel-plan', async (req, res) => {
         })
       }
       plan = JSON.parse(jsonMatch[0])
+      // -- Enkel validering --
+      if (!plan.days || !Array.isArray(plan.days)) {
+        return res.status(502).json({ error: 'Ingen days[]-array i svar', raw: plan })
+      }
+      if (!plan.days.every(day => typeof day.date === 'string' && Array.isArray(day.activities))) {
+        return res.status(502).json({ error: 'day saknar date eller activities-array', raw: plan })
+      }
     } catch (parseError) {
       return res.status(502).json({
         error: 'Failed to parse AI response as JSON',
@@ -78,6 +85,29 @@ app.post('/api/travel-plan', async (req, res) => {
     console.error('Travel plan error:', error);
     const message = error instanceof Error ? error.message : 'Failed to generate travel plan'
     return res.status(500).json({ error: message })
+  }
+})
+
+import { saveTrip, getTrip } from './src/sharedTripStore.js'
+
+app.post('/api/shared-trips', async (req, res) => {
+  try {
+    const trip = req.body
+    if (!trip) return res.status(400).json({ error: 'Missing trip' })
+    const id = await saveTrip(trip)
+    res.status(201).json({ shareId: id })
+  } catch (e) {
+    res.status(500).json({ error: 'Could not save trip', details: e })
+  }
+})
+
+app.get('/api/shared-trips/:shareId', async (req, res) => {
+  try {
+    const trip = await getTrip(req.params.shareId)
+    if (!trip) return res.status(404).json({ error: 'Not found' })
+    res.json(trip)
+  } catch (e) {
+    res.status(500).json({ error: 'Could not load trip', details: e })
   }
 })
 
