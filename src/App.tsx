@@ -412,32 +412,49 @@ function ProfilePage() {
       <h2 className="text-2xl font-bold mb-4">Your Saved Trips</h2>
       {trips.length === 0 && <p className="text-slate-400">No saved trips yet.</p>}
       {trips.map((t, i) => (
-        <div key={i} className="mb-6 rounded border border-indigo-100 bg-slate-900/60 p-4">
-          <div className="font-semibold text-lg">{t.destination}</div>
-          <div className="text-sm text-slate-300">
-            {t.startDate} → {t.endDate} | {t.budget}
-          </div>
-          <div className="text-xs text-slate-400">{(t.interests || []).join(', ')}</div>
-          <div className="flex gap-2 mt-2">
-            <button
-              onClick={() => navigate('/planner/results', { state: { plan: t } })}
-              className="rounded bg-indigo-500 px-3 py-1 text-white hover:bg-indigo-600 text-xs">
-              Load this trip
-            </button>
-            <button
-              onClick={() => {
-                const confirmDelete = window.confirm('Delete this trip?');
-                if (!confirmDelete) return;
-                const newTrips = trips.filter((_, j) => i !== j);
-                setTrips(newTrips);
-                localStorage.setItem('savedTrips', JSON.stringify(newTrips));
-              }}
-              className="rounded bg-rose-600 px-3 py-1 text-white hover:bg-rose-700 text-xs">
-              Delete
-            </button>
-          </div>
-        </div>
-      ))}
+  <div key={i} className="mb-6 rounded border border-indigo-100 bg-slate-900/60 p-4">
+    <div className="font-semibold text-lg">
+      {t.tripName
+  ? <>{t.tripName}{t.destination ? <span className="text-xs text-slate-400"> ({t.destination})</span> : null}</>
+  : t.destination
+}
+    </div>
+    <div className="text-sm text-slate-300">
+      {[t.startDate, t.endDate].filter(Boolean).join(' → ')}{(t.startDate || t.endDate) && t.budget ? ' | ' : ''}{t.budget}
+    </div>
+    <div className="text-xs text-slate-400">{(t.interests || []).join(', ')}</div>
+    <div className="flex gap-2 mt-2">
+      <button
+        onClick={() => navigate('/planner/results', { state: { plan: t } })}
+        className="rounded bg-indigo-500 px-3 py-1 text-white hover:bg-indigo-600 text-xs">
+        Load this trip
+      </button>
+      <button
+        onClick={() => {
+          const confirmDelete = window.confirm('Delete this trip?');
+          if (!confirmDelete) return;
+          const newTrips = trips.filter((_, j) => i !== j);
+          setTrips(newTrips);
+          localStorage.setItem('savedTrips', JSON.stringify(newTrips));
+        }}
+        className="rounded bg-rose-600 px-3 py-1 text-white hover:bg-rose-700 text-xs">
+        Delete
+      </button>
+      <button
+        onClick={() => {
+          const newName = prompt('Ge resan ett nytt namn:', t.tripName || t.destination);
+          if (typeof newName === 'string' && newName.trim().length > 0) {
+            const updatedTrips = trips.map((trip, idx) => idx === i ? { ...trip, tripName: newName.trim() } : trip);
+            setTrips(updatedTrips);
+            localStorage.setItem('savedTrips', JSON.stringify(updatedTrips));
+          }
+        }}
+        className="rounded bg-yellow-600 px-3 py-1 text-white hover:bg-yellow-700 text-xs">
+        Edit name
+      </button>
+    </div>
+  </div>
+))}
     </main>
   );
 }
@@ -591,18 +608,6 @@ function ResultsPage() {
               }}
             />
           </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-slate-300">Destination</p>
-              <p className="text-xl font-semibold text-white">{plan.destination}</p>
-            </div>
-            <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-indigo-100">
-              {plan.budget} budget
-            </div>
-          </div>
-          <p className="text-sm text-slate-300">
-            {plan.startDate} → {plan.endDate} · {plan.travelers}
-          </p>
 
           <div className="space-y-4">
             <p className="text-sm font-semibold text-white">Timeline</p>

@@ -16,6 +16,7 @@ export interface PlanDay {
 }
 
 export interface TravelPlan {
+  tripName?: string; // Custom trip name
   destination: string;
   startDate: string;
   endDate: string;
