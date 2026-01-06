@@ -34,6 +34,10 @@ export interface TravelPlan {
   }>;
   transportNotes?: string[];
   safetyNotes?: string[];
+  /**
+   * Fritt anteckningsfält för egna bokningar (UI-driven, inte AI-genererat).
+   */
+  reservationsNotepad?: string;
 }
 
 

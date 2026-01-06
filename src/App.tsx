@@ -1,9 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import SharedTripPage from './SharedTripPage'
-import ShareTripButton from './ShareTripButton'
 import PrintTripPage from './PrintTripPage'
 import RemoteResultsPage from './RemoteResultsPage'
-import ShareRemoteButton from './ShareRemoteButton'
 import type { FormEvent } from 'react'
 import { Link, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { generateTravelPlan } from './services/api'
@@ -99,24 +97,20 @@ function Header() {
 function Footer() {
   return (
     <footer className="border-t border-white/5 bg-slate-950/80 px-4 py-8 text-sm text-slate-400">
-      <div className="mx-auto flex max-w-6xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-2 text-slate-200">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-xs font-semibold">
-            FP
-          </span>
-          <div>
-            <p className="font-semibold text-white">Frontpage</p>
-            <p className="text-xs text-slate-400">Built with Tailwind CSS</p>
-          </div>
+      <div className="mx-auto flex max-w-4xl flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2 text-slate-400 text-sm font-medium">
+          <span>Adress: Flygelgatan 4</span>
+          <span>Phone nr: 073*******</span>
+          <span>Philip Antebrink</span>
         </div>
-        <div className="flex flex-wrap items-center gap-4">
+        <div className="flex flex-col gap-2 items-end sm:items-end text-slate-400 text-sm font-medium text-right">
           <Link className="hover:text-white" to="/planner">
             Planner
           </Link>
           <a className="hover:text-white" href="mailto:hello@example.com">
             Support
           </a>
-          <span className="text-slate-500">© {new Date().getFullYear()} Frontpage</span>
+          <span className="text-slate-500">© {new Date().getFullYear()} Travel Planner</span>
         </div>
       </div>
     </footer>
@@ -402,7 +396,7 @@ const samplePlan: TravelPlan = {
 }
 
 function ProfilePage() {
-  const [trips] = useState<TravelPlan[]>(() => {
+  const [trips, setTrips] = useState<TravelPlan[]>(() => {
     const saved = localStorage.getItem('savedTrips');
     if (saved !== null) {
       try {
@@ -424,11 +418,24 @@ function ProfilePage() {
             {t.startDate} → {t.endDate} | {t.budget}
           </div>
           <div className="text-xs text-slate-400">{(t.interests || []).join(', ')}</div>
-          <button
-            onClick={() => navigate('/planner/results', { state: { plan: t } })}
-            className="mt-2 rounded bg-indigo-500 px-3 py-1 text-white hover:bg-indigo-600 text-xs">
-            Load this trip
-          </button>
+          <div className="flex gap-2 mt-2">
+            <button
+              onClick={() => navigate('/planner/results', { state: { plan: t } })}
+              className="rounded bg-indigo-500 px-3 py-1 text-white hover:bg-indigo-600 text-xs">
+              Load this trip
+            </button>
+            <button
+              onClick={() => {
+                const confirmDelete = window.confirm('Delete this trip?');
+                if (!confirmDelete) return;
+                const newTrips = trips.filter((_, j) => i !== j);
+                setTrips(newTrips);
+                localStorage.setItem('savedTrips', JSON.stringify(newTrips));
+              }}
+              className="rounded bg-rose-600 px-3 py-1 text-white hover:bg-rose-700 text-xs">
+              Delete
+            </button>
+          </div>
         </div>
       ))}
     </main>
@@ -442,12 +449,31 @@ function ResultsPage() {
   const location = useLocation();
   const origPlan = (location.state as { plan?: TravelPlan } | null)?.plan ?? samplePlan;
   const [plan, setPlan] = useState(origPlan);
+  const [mapCenter, setMapCenter] = useState<[number, number]>([35.0116, 135.7681]); // fallback: Kyoto
   const [editField, setEditField] = useState<null | { dayIdx: number, activityIdx: number }>(null);
   const [editValue, setEditValue] = useState('');
   const [regenerating, setRegenerating] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [selectedActivityId, setSelectedActivityId] = useState<string | null>(null);
   const activityRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  // Center the map to the destination or first marker with lat/lng
+  useEffect(() => {
+    // Get all markers with lat/lng
+    const allActivities = plan.days.flatMap(day => day.activities);
+    const markerWithCoords = allActivities.find(a => typeof a.lat === 'number' && typeof a.lng === 'number');
+    if (markerWithCoords) {
+      setMapCenter([markerWithCoords.lat!, markerWithCoords.lng!]);
+      return;
+    }
+    // Fallback: geocode entire destination string
+    let cancelled = false;
+    (async () => {
+      const geo = await geocode(plan.destination, plan.destination);
+      if (geo && !cancelled) setMapCenter([geo.lat, geo.lng]);
+    })();
+    return () => { cancelled = true; };
+  }, [plan.destination, plan.days]);
 
   // Geocode activities on first mount
   useEffect(() => {
@@ -506,9 +532,11 @@ function ResultsPage() {
             if (!tripId) {
               tripId = (Math.random().toString(36).slice(2,10));
               (plan as unknown as { _sharedId?: string })._sharedId = tripId;
-              localStorage.setItem('trip-' + tripId, JSON.stringify(plan));
             }
-            window.open(`/trip/${tripId}/print`, '_blank');
+            localStorage.setItem('trip-' + tripId, JSON.stringify(plan));
+            setTimeout(() => {
+              window.open(`/trip/${tripId}/print`, '_blank');
+            }, 100);
           }}
         >
           Exportera som PDF
@@ -519,8 +547,6 @@ function ResultsPage() {
         >
           Save to Profile
         </button>
-        <ShareTripButton plan={plan} />
-        <ShareRemoteButton plan={plan} />
       </div>
 
       {dirty && (
@@ -549,7 +575,7 @@ function ResultsPage() {
           <div>
             <h3 className="text-lg font-bold mb-2 text-indigo-200">Karta över resmål</h3>
             <MapView
-              center={[35.0116, 135.7681]} // fallback center
+              center={mapCenter}
               markers={plan.days.flatMap(day => day.activities.filter(a => typeof a.lat === 'number' && typeof a.lng === 'number').map(a => ({
                 id: a.id,
                 position: [a.lat!, a.lng!],
@@ -688,29 +714,38 @@ function ResultsPage() {
           </div>
 
           <div className="rounded-2xl border border-white/5 bg-slate-900/70 p-6 shadow-xl shadow-indigo-500/10">
-            <p className="text-sm font-semibold text-white">Reservations</p>
-            <ul className="mt-3 space-y-3 text-sm text-slate-300">
-              {(plan.reservations ?? []).map((res, idx) => (
-                <li
-                  key={`${res.name}-${idx}`}
-                  className="rounded-lg border border-white/5 bg-slate-900/80 p-3"
-                >
-                  <p className="font-semibold text-white">
-                    {res.type.toUpperCase()} · {res.name}
-                  </p>
-                  {res.time ? <p className="text-xs text-slate-400">Time: {res.time}</p> : null}
-                  {res.address ? (
-                    <p className="text-xs text-slate-400">Address: {res.address}</p>
-                  ) : null}
-                  {res.confirmation ? (
-                    <p className="text-xs text-slate-400">Confirmation: {res.confirmation}</p>
-                  ) : null}
-                </li>
-              ))}
-              {plan.reservations?.length ? null : (
-                <li className="text-xs text-slate-500">No reservations yet.</li>
-              )}
-            </ul>
+            <p className="text-sm font-semibold text-white mb-2">Reservations</p>
+            <textarea
+              className="w-full min-h-[100px] rounded border border-white/10 bg-slate-900/80 p-3 text-sm text-slate-200 placeholder:text-slate-500 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/40 resize-vertical"
+              value={plan.reservationsNotepad ?? (Array.isArray(plan.reservations) ? plan.reservations.map(
+                res => `${res.type ? res.type.toUpperCase() + ' – ' : ''}${res.name}${res.time ? ' kl ' + res.time : ''}${res.address ? ', ' + res.address : ''}${res.confirmation ? ', ' + res.confirmation : ''}`
+              ).join("\n") : '')}
+              onChange={e => {
+                setPlan({ ...plan, reservationsNotepad: e.target.value });
+                setDirty(true);
+              }}
+              placeholder="Notera hotell, restaurangbokningar, tider, adresser, mm..."
+            />
+            <button
+              className="mt-2 rounded bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-700 disabled:opacity-60"
+              onClick={() => {
+                const saved = JSON.parse(localStorage.getItem('savedTrips') || '[]');
+                const idx = saved.findIndex(
+                  (t: typeof plan) => t.destination === plan.destination && t.startDate === plan.startDate && t.endDate === plan.endDate
+                );
+                if (idx !== -1) {
+                  saved[idx] = { ...plan };
+                } else {
+                  saved.push(plan);
+                }
+                localStorage.setItem('savedTrips', JSON.stringify(saved));
+                alert('Sparat!');
+                setDirty(false);
+              }}
+              disabled={!dirty}
+              type="button"
+            >Spara anteckningar</button>
+            <p className="text-xs text-slate-500 mt-1">Fritt notisfält för egna bokningsanteckningar</p>
           </div>
 
           <div className="rounded-2xl border border-white/5 bg-slate-900/70 p-6 shadow-xl shadow-indigo-500/10">

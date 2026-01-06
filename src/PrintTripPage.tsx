@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import type { TravelPlan } from "./types/travel";
 
@@ -89,4 +89,5 @@ export default function PrintTripPage() {
     </div>
   );
 }
+
 

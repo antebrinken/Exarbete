@@ -49,3 +49,4 @@ export default function ShareTripButton({ plan }: { plan: any }) {
   );
 }
 
+
