@@ -495,6 +495,8 @@ function ResultsPage() {
   const location = useLocation();
   const origPlan = (location.state as { plan?: TravelPlan } | null)?.plan ?? samplePlan;
   const [plan, setPlan] = useState(origPlan);
+  const planRef = useRef(plan);
+  useEffect(() => { planRef.current = plan; }, [plan]);
   const [mapCenter, setMapCenter] = useState<[number, number]>([35.0116, 135.7681]); // fallback: Kyoto
   const [editField, setEditField] = useState<null | { dayIdx: number, activityIdx: number }>(null);
   const [editValue, setEditValue] = useState('');
@@ -520,7 +522,14 @@ function ResultsPage() {
   // Save to Profile
   const saveToProfile = () => {
     const saved: TravelPlan[] = JSON.parse(localStorage.getItem('savedTrips') || '[]');
-    saved.push(plan);
+    // Use the latest value of plan from ref to avoid race conditions
+    const currentPlan = planRef.current;
+    const idx = saved.findIndex(t => t.destination === currentPlan.destination && t.startDate === currentPlan.startDate && t.endDate === currentPlan.endDate);
+    if (idx !== -1) {
+      saved[idx] = currentPlan;
+    } else {
+      saved.push(currentPlan);
+    }
     localStorage.setItem('savedTrips', JSON.stringify(saved));
     alert('Trip saved to your profile!');
   }
@@ -558,26 +567,6 @@ function ResultsPage() {
         </button>
       </div>
 
-      {dirty && (
-        <button
-          className="bg-green-600 text-white px-4 py-2 rounded mb-6 hover:bg-green-700"
-          onClick={() => {
-            // save edited plan to localStorage and show notification
-            const saved: TravelPlan[] = JSON.parse(localStorage.getItem('savedTrips') || '[]');
-            const idx = saved.findIndex(t => t.destination === plan.destination && t.startDate === plan.startDate && t.endDate === plan.endDate);
-            if(idx !== -1){
-              saved[idx] = plan;
-            } else {
-              saved.push(plan);
-            }
-            localStorage.setItem('savedTrips', JSON.stringify(saved));
-            setDirty(false);
-            alert('Changes saved to profile!');
-          }}
-        >
-          Save changes to profile
-        </button>
-      )}
       <section id="plan-to-pdf" className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="space-y-6 rounded-2xl border border-white/5 bg-slate-900/60 p-6 shadow-xl shadow-indigo-500/10">
           {/* Map View for this trip */}
@@ -718,7 +707,7 @@ function ResultsPage() {
                 res => `${res.type ? res.type.toUpperCase() + ' – ' : ''}${res.name}${res.time ? ' kl ' + res.time : ''}${res.address ? ', ' + res.address : ''}${res.confirmation ? ', ' + res.confirmation : ''}`
               ).join("\n") : '')}
               onChange={e => {
-                setPlan({ ...plan, reservationsNotepad: e.target.value });
+                setPlan(prev => ({ ...prev, reservationsNotepad: e.target.value }));
                 setDirty(true);
               }}
               placeholder="Note hotels, restaurant bookings, times, addresses, etc..."
@@ -727,19 +716,20 @@ function ResultsPage() {
               className="mt-2 rounded bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-700 disabled:opacity-60"
               onClick={() => {
                 const saved = JSON.parse(localStorage.getItem('savedTrips') || '[]');
+                const currentPlan = planRef.current;
                 const idx = saved.findIndex(
-                  (t: typeof plan) => t.destination === plan.destination && t.startDate === plan.startDate && t.endDate === plan.endDate
+                  (t: typeof currentPlan) => t.destination === currentPlan.destination && t.startDate === currentPlan.startDate && t.endDate === currentPlan.endDate
                 );
                 if (idx !== -1) {
-                  saved[idx] = { ...plan };
+                  saved[idx] = { ...currentPlan };
                 } else {
-                  saved.push(plan);
+                  saved.push(currentPlan);
                 }
                 localStorage.setItem('savedTrips', JSON.stringify(saved));
-                alert('Sparat!');
+                alert('Notes saved to profile!');
                 setDirty(false);
               }}
-              disabled={!dirty}
+              disabled={!(dirty && planRef.current.reservationsNotepad !== undefined && planRef.current.reservationsNotepad !== (Array.isArray(planRef.current.reservations) ? planRef.current.reservations.map(res => `${res.type ? res.type.toUpperCase() + ' – ' : ''}${res.name}${res.time ? ' kl ' + res.time : ''}${res.address ? ', ' + res.address : ''}${res.confirmation ? ', ' + res.confirmation : ''}`).join("\n") : ""))}
               type="button"
             >Save notes</button>
             <p className="text-xs text-slate-500 mt-1">Free notes field for your own booking information</p>
