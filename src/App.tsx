@@ -16,6 +16,43 @@ const navLinks = [
   { label: 'Results', to: '/planner/results' },
 ]
 
+type MenuProps = { loggedIn: boolean, navigate: (to: string) => void };
+function Menu({ loggedIn, navigate }: MenuProps) {
+  const [open, setOpen] = useState(false);
+  // Close menu on navigation
+  useEffect(() => {
+    if (!open) return;
+    const handler = () => setOpen(false);
+    window.addEventListener('popstate', handler);
+    return () => window.removeEventListener('popstate', handler);
+  }, [open]);
+  return (
+    <div className="relative">
+      <button onClick={() => setOpen((v) => !v)} className="p-2 rounded hover:bg-slate-800" aria-label="User menu">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-7 w-7 text-slate-200">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5m-16.5 5.25h16.5m-16.5 5.25h16.5" />
+        </svg>
+      </button>
+      {open && (
+        <div className="absolute right-0 z-50 mt-2 w-48 rounded-lg border border-white/10 bg-slate-900 shadow-2xl text-left">
+          {loggedIn ? (
+            <>
+              <button className="w-full text-left px-4 py-2 hover:bg-slate-800" onClick={() => { setOpen(false); navigate('/profile'); }}>Profile</button>
+              <button className="w-full text-left px-4 py-2 hover:bg-slate-800" onClick={() => { setOpen(false); navigate('/settings'); }}>Settings</button>
+              <button className="w-full text-left px-4 py-2 hover:bg-slate-800" onClick={() => { localStorage.removeItem('loggedInAccount'); setOpen(false); navigate('/'); window.dispatchEvent(new Event('login-status')); }}>Logout</button>
+            </>
+          ) : (
+            <>
+              <button className="w-full text-left px-4 py-2 hover:bg-slate-800" onClick={() => { setOpen(false); navigate('/login'); }}>Login</button>
+              <button className="w-full text-left px-4 py-2 hover:bg-slate-800" onClick={() => { setOpen(false); navigate('/settings'); }}>Settings</button>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function Header() {
   const navigate = useNavigate();
   const [loggedIn, setLoggedIn] = useState(false);
@@ -67,28 +104,13 @@ function Header() {
         </nav>
 
         <div className="flex items-center gap-3">
-          {loggedIn ? (
-            <button
-              className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-200 transition hover:text-white"
-              onClick={() => navigate('/profile')}
-            >
-              Profile
-            </button>
-          ) : (
-            <button
-              className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-200 transition hover:text-white"
-              onClick={() => navigate('/login')}
-            >
-              Log in
-            </button>
-          )}
-          <Link
-            to="/planner"
-            className="rounded-lg bg-indigo-500 px-3.5 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition hover:bg-indigo-400"
-          >
-            Plan a trip
-          </Link>
-        </div>
+  {/* Hamburger Menu */}
+  <div className="flex items-center gap-1">
+    <span className="text-slate-200 text-sm font-semibold mr-1 sm:inline hidden">Menu</span>
+    <span className="text-slate-200 text-sm font-semibold mr-1 inline sm:hidden">Menu</span>
+    <Menu loggedIn={loggedIn} navigate={navigate}/>
+  </div>
+</div>
       </div>
     </header>
   )
@@ -190,7 +212,7 @@ function PlannerPage() {
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <label className="text-sm font-semibold text-white" htmlFor="destination">
-                Destination <span className="text-xs text-slate-400">(text)</span>
+                Destination <span className="text-xs text-slate-400"></span>
               </label>
               <input
                 id="destination"
@@ -202,7 +224,7 @@ function PlannerPage() {
             </div>
             <div className="space-y-2">
               <label className="text-sm font-semibold text-white" htmlFor="budget">
-                Budget <span className="text-xs text-slate-400">(select)</span>
+                Budget <span className="text-xs text-slate-400"></span>
               </label>
               <select
                 id="budget"
@@ -218,29 +240,37 @@ function PlannerPage() {
             </div>
             <div className="space-y-2">
               <label className="text-sm font-semibold text-white" htmlFor="startDate">
-                Start date <span className="text-xs text-slate-400">(date)</span>
+                Start date <span className="text-xs text-slate-400">yyyy-mm-dd</span>
               </label>
-              <input
-                id="startDate"
-                name="startDate"
-                type="date"
-                className="w-full rounded-lg border border-white/10 bg-slate-900/80 px-3 py-2 text-sm text-white focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/40"
-              />
+<input
+   id="startDate"
+   name="startDate"
+   type="text"
+   placeholder="yyyy-mm-dd"
+   pattern="\\d{4}-\\d{2}-\\d{2}"
+   title="Enter date in yyyy-mm-dd format"
+   className="w-full rounded-lg border border-white/10 bg-slate-900/80 px-3 py-2 text-sm text-white focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/40"
+   required
+ />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-semibold text-white" htmlFor="endDate">
-                End date <span className="text-xs text-slate-400">(date)</span>
+                End date <span className="text-xs text-slate-400">yyyy-mm-dd</span>
               </label>
-              <input
-                id="endDate"
-                name="endDate"
-                type="date"
-                className="w-full rounded-lg border border-white/10 bg-slate-900/80 px-3 py-2 text-sm text-white focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/40"
-              />
+<input
+   id="endDate"
+   name="endDate"
+   type="text"
+   placeholder="yyyy-mm-dd"
+   pattern="\\d{4}-\\d{2}-\\d{2}"
+   title="Enter date in yyyy-mm-dd format"
+   className="w-full rounded-lg border border-white/10 bg-slate-900/80 px-3 py-2 text-sm text-white focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/40"
+   required
+ />
             </div>
             <div className="space-y-2 sm:col-span-2">
               <p className="text-sm font-semibold text-white">
-                Interests <span className="text-xs text-slate-400">(checkbox)</span>
+                Interests <span className="text-xs text-slate-400"></span>
               </p>
               <div className="flex flex-wrap gap-3">
                 {['Food', 'Museums', 'Outdoors', 'Nightlife', 'Beaches', 'Shopping'].map(
@@ -264,7 +294,7 @@ function PlannerPage() {
             <div className="space-y-2 sm:col-span-2">
               <label className="text-sm font-semibold text-white" htmlFor="travelers">
                 Travel company / how many people{' '}
-                <span className="text-xs text-slate-400">(optional)</span>
+                <span className="text-xs text-slate-400"></span>
               </label>
               <input
                 id="travelers"
@@ -351,7 +381,7 @@ const samplePlan: TravelPlan = {
       ]
     },
     {
-      date: '2025-04-13',
+      date: '2025-04-12',
       activities: [
         { id: '4', label: 'morning', text: 'Visit Fushimi Inari early to beat crowds.', source: 'ai', placeQuery: 'Fushimi Inari Taisha, Kyoto' },
         { id: '5', label: 'afternoon', text: 'Cycle along Kamo River and stop at local cafés.', source: 'ai', placeQuery: 'Kamo River, Kyoto' },
@@ -359,7 +389,7 @@ const samplePlan: TravelPlan = {
       ]
     },
     {
-      date: '2025-04-14',
+      date: '2025-04-12',
       activities: [
         { id: '7', label: 'morning', text: 'Philosopher’s Path walk and temples.', source: 'ai', placeQuery: 'Philosopher’s Path, Kyoto' },
         { id: '8', label: 'afternoon', text: 'Arashiyama bamboo grove + Tenryuji gardens.', source: 'ai', placeQuery: 'Arashiyama Bamboo Grove, Kyoto' },
@@ -367,7 +397,7 @@ const samplePlan: TravelPlan = {
       ]
     },
     {
-      date: '2025-04-15',
+      date: '2025-04-12',
       activities: [
         { id: '10', label: 'morning', text: 'Souvenir stop; pack.', source: 'ai' },
         { id: '11', label: 'afternoon', text: 'Check-out and head to Kansai Airport.', source: 'ai', placeQuery: 'Kansai Airport' },

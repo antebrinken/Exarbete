@@ -47,6 +47,7 @@ const LoginForm: React.FC = () => {
       }
       localStorage.setItem('loggedInAccount', JSON.stringify(acc));
       setMessage('Login successful!');
+      window.dispatchEvent(new Event('login-status'));
       // Optionally redirect or close modal
       return;
     }
