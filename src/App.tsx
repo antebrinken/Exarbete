@@ -459,8 +459,7 @@ function ProfilePage() {
   );
 }
 
-import { geocode } from './services/geocode';
-import type { ActivityItem, PlanDay, TravelPlan } from './types/travel';
+import type { TravelPlan } from './types/travel';
 
 function ResultsPage() {
   const location = useLocation();
@@ -483,47 +482,10 @@ function ResultsPage() {
       setMapCenter([markerWithCoords.lat!, markerWithCoords.lng!]);
       return;
     }
-    // Fallback: geocode entire destination string
-    let cancelled = false;
-    (async () => {
-      const geo = await geocode(plan.destination, plan.destination);
-      if (geo && !cancelled) setMapCenter([geo.lat, geo.lng]);
-    })();
-    return () => { cancelled = true; };
+// Fallback: just set to default coordinates
+    setMapCenter([35.0116, 135.7681]); // Kyoto
   }, [plan.destination, plan.days]);
 
-  // Geocode activities on first mount
-  useEffect(() => {
-    async function enrichPlanWithCoords(orig: TravelPlan) {
-      let changed = false;
-      const days: PlanDay[] = await Promise.all(orig.days.map(async (day) => {
-        const activities: ActivityItem[] = await Promise.all(day.activities.map(async (activity) => {
-          if ((activity.lat && activity.lng) || !(activity.placeQuery || activity.text)) return activity;
-          const query = activity.placeQuery || activity.text;
-          const coords = await geocode(query, orig.destination);
-          if (coords) {
-            changed = true;
-            return { ...activity, lat: coords.lat, lng: coords.lng };
-          }
-          return activity;
-        }));
-        return { ...day, activities };
-      }));
-      if (changed) {
-        const updatedPlan = { ...orig, days };
-        setPlan(updatedPlan);
-        // Save to localStorage (update saved trip immediately)
-        const savedTrips = JSON.parse(localStorage.getItem('savedTrips') || '[]');
-        const idx = savedTrips.findIndex((t: TravelPlan) => t.destination === updatedPlan.destination && t.startDate === updatedPlan.startDate && t.endDate === updatedPlan.endDate);
-        if (idx !== -1) savedTrips[idx] = updatedPlan;
-        else savedTrips.push(updatedPlan);
-        localStorage.setItem('savedTrips', JSON.stringify(savedTrips));
-      }
-    }
-    enrichPlanWithCoords(plan);
-    // Only run once on mount unless plan changes type
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // Save to Profile
   const saveToProfile = () => {
@@ -537,10 +499,10 @@ function ResultsPage() {
     <main className="mx-auto flex max-w-6xl flex-col gap-10 px-4 py-16 sm:py-20">
       <div className="space-y-3 mt-3 mb-5 text-center">
         <h1 className="text-4xl font-extrabold text-white tracking-tight mb-3" style={{ cursor: 'pointer' }} onClick={() => setEditField(null)} title="Click to edit">
-          Din Resplan
+          Your Itinerary
         </h1>
         <p className="max-w-2xl mx-auto text-lg text-slate-300">
-          Här får du en dag-för-dag-resplan skräddarsydd för dig. Klicka på "Din Resplan" för att redigera!
+          Here you get a day-by-day itinerary tailored just for you. Click "Your Itinerary" to edit.
         </p>
         <button
           className="rounded-lg border border-indigo-300 bg-indigo-500 px-4 py-2 text-white mt-3 font-semibold hover:bg-indigo-600 mr-3"
@@ -556,7 +518,7 @@ function ResultsPage() {
             }, 100);
           }}
         >
-          Exportera som PDF
+          Export as PDF
         </button>
         <button
           className="rounded-lg border border-green-300 bg-green-500 px-4 py-2 text-white mt-3 font-semibold hover:bg-green-600 mr-3"
@@ -590,7 +552,7 @@ function ResultsPage() {
         <div className="space-y-6 rounded-2xl border border-white/5 bg-slate-900/60 p-6 shadow-xl shadow-indigo-500/10">
           {/* Map View for this trip */}
           <div>
-            <h3 className="text-lg font-bold mb-2 text-indigo-200">Karta över resmål</h3>
+            <h3 className="text-lg font-bold mb-2 text-indigo-200">Map for your destinations</h3>
             <MapView
               center={mapCenter}
               markers={plan.days.flatMap(day => day.activities.filter(a => typeof a.lat === 'number' && typeof a.lng === 'number').map(a => ({
@@ -729,7 +691,7 @@ function ResultsPage() {
                 setPlan({ ...plan, reservationsNotepad: e.target.value });
                 setDirty(true);
               }}
-              placeholder="Notera hotell, restaurangbokningar, tider, adresser, mm..."
+              placeholder="Note hotels, restaurant bookings, times, addresses, etc..."
             />
             <button
               className="mt-2 rounded bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-700 disabled:opacity-60"
@@ -749,8 +711,8 @@ function ResultsPage() {
               }}
               disabled={!dirty}
               type="button"
-            >Spara anteckningar</button>
-            <p className="text-xs text-slate-500 mt-1">Fritt notisfält för egna bokningsanteckningar</p>
+            >Save notes</button>
+            <p className="text-xs text-slate-500 mt-1">Free notes field for your own booking information</p>
           </div>
 
           <div className="rounded-2xl border border-white/5 bg-slate-900/70 p-6 shadow-xl shadow-indigo-500/10">
