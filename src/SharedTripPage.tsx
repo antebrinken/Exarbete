@@ -9,10 +9,12 @@ export default function SharedTripPage() {
 
   useEffect(() => {
     if (id) {
-      const data = localStorage.getItem('trip-' + id);
-      if (data) {
-        setTrip(JSON.parse(data));
-      }
+      Promise.resolve().then(() => {
+        const data = localStorage.getItem('trip-' + id);
+        if (data) {
+          setTrip(JSON.parse(data));
+        }
+      });
     }
   }, [id]);
 
@@ -31,8 +33,8 @@ export default function SharedTripPage() {
       <div className="mb-6">
         <MapView
           center={trip.days.find(d=>d.activities.some(a=>a.lat && a.lng))?.activities.find(a=>a.lat && a.lng)?.lat ? [
-            trip.days.find(d=>d.activities.some(a=>a.lat && a.lng))?.activities.find(a=>a.lat && a.lng)?.lat!,
-            trip.days.find(d=>d.activities.some(a=>a.lat && a.lng))?.activities.find(a=>a.lat && a.lng)?.lng!
+            trip.days.find(d=>d.activities.some(a=>typeof a.lat==='number' && typeof a.lng==='number'))?.activities.find(a=>typeof a.lat==='number' && typeof a.lng==='number')?.lat ?? 0,
+            trip.days.find(d=>d.activities.some(a=>typeof a.lat==='number' && typeof a.lng==='number'))?.activities.find(a=>typeof a.lat==='number' && typeof a.lng==='number')?.lng ?? 0
           ] : [0,0]}
           markers={trip.days.flatMap(day => day.activities.filter(a => typeof a.lat === 'number' && typeof a.lng === 'number').map(a => ({
             id: a.id,

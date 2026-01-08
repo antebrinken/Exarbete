@@ -10,10 +10,12 @@ export default function PrintTripPage() {
 
   useEffect(() => {
     if (id) {
-      const data = localStorage.getItem("trip-" + id);
-      if (data) {
-        setTrip(JSON.parse(data));
-      }
+      Promise.resolve().then(() => {
+        const data = localStorage.getItem("trip-" + id);
+        if (data) {
+          setTrip(JSON.parse(data));
+        }
+      });
     }
   }, [id]);
 
@@ -23,7 +25,6 @@ export default function PrintTripPage() {
       onceRef.current = true;
       setTimeout(() => window.print(), 400);
     }
-    // eslint-disable-next-line
   }, [trip]);
 
   if (!trip) {

@@ -18,7 +18,9 @@ export async function generateTravelPlan(formData: TravelFormData): Promise<Trav
   return data as TravelPlan;
 }
 
-export async function regenerateDay(formData: TravelFormData): Promise<import("../types/travel").TravelPlanDay> {
+import type { PlanDay } from '../types/travel'
+
+export async function regenerateDay(formData: TravelFormData): Promise<PlanDay> {
   const plan = await generateTravelPlan(formData);
   return plan.days[0];
 }

@@ -5,17 +5,23 @@ function uuidv4() {
   return "xxxxxxxx".replace(/x/g, () => ((Math.random() * 36) | 0).toString(36));
 }
 
-export default function ShareTripButton({ plan }: { plan: any }) {
+import type { TravelPlan } from './types/travel';
+
+export default function ShareTripButton({ plan }: { plan: TravelPlan }) {
   const [sharedId, setSharedId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   function handleShare() {
-    let tripId = plan.sharedId || plan._id || null;
+    let tripId = plan.sharedId;
+    if (!tripId && typeof (plan as { _id?: string })._id === 'string') {
+      tripId = ((plan as unknown) as { _id: string })._id;
+    }
+    let sharePlan = plan;
     if (!tripId) {
       tripId = uuidv4();
-      plan.sharedId = tripId;
+      sharePlan = { ...plan, sharedId: tripId };
     }
-    localStorage.setItem("trip-" + tripId, JSON.stringify(plan));
+    localStorage.setItem("trip-" + tripId, JSON.stringify(sharePlan));
     setSharedId(tripId);
     // copy link
     if (navigator.clipboard) {

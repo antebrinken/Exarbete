@@ -1,6 +1,8 @@
 import { useState } from "react";
 
-export default function ShareRemoteButton({ plan }: { plan: any }) {
+import type { TravelPlan } from './types/travel';
+
+export default function ShareRemoteButton({ plan }: { plan: TravelPlan }) {
   const [sharedId, setSharedId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -23,8 +25,12 @@ export default function ShareRemoteButton({ plan }: { plan: any }) {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       }
-    } catch (e:any) {
-      setErr(e.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setErr(error.message);
+      } else {
+        setErr(String(error));
+      }
     } finally {
       setLoading(false);
     }
