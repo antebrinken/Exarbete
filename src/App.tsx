@@ -595,7 +595,7 @@ function ResultsPage() {
             <div className="space-y-4">
               {plan.days.map((day, idx) => (
   <div
-    key={day.date}
+    key={day.date + '-' + idx}
     className="grid gap-3 rounded-xl border border-white/5 bg-slate-900/80 p-4 sm:grid-cols-[auto,1fr]"
   >
     <div className="flex gap-2 sm:flex-col sm:items-start">
@@ -678,8 +678,8 @@ function ResultsPage() {
           <div className="rounded-2xl border border-white/5 bg-slate-900/70 p-6 shadow-xl shadow-indigo-500/10">
             <p className="text-sm font-semibold text-white">Packing list</p>
             <ul className="mt-3 space-y-2 text-sm text-slate-300">
-              {plan.packingList.map((item) => (
-                <li key={item} className="flex items-start gap-2">
+              {plan.packingList.map((item, i) => (
+                <li key={item + '-' + i} className="flex items-start gap-2">
                   <span className="mt-1 h-1.5 w-1.5 rounded-full bg-emerald-400" />
                   {item}
                 </li>
@@ -690,8 +690,8 @@ function ResultsPage() {
           <div className="rounded-2xl border border-white/5 bg-slate-900/70 p-6 shadow-xl shadow-indigo-500/10">
             <p className="text-sm font-semibold text-white">Tips & advice</p>
             <ul className="mt-3 space-y-2 text-sm text-slate-300">
-              {plan.tips.map((tip) => (
-                <li key={tip} className="flex items-start gap-2">
+{plan.tips.map((tip, i) => (
+              <li key={tip + '-' + i} className="flex items-start gap-2">
                   <span className="mt-1 h-1.5 w-1.5 rounded-full bg-indigo-400" />
                   {tip}
                 </li>
