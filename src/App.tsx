@@ -41,12 +41,16 @@ function Menu({ loggedIn, navigate }: MenuProps) {
         <div className="absolute right-0 z-50 mt-2 w-48 rounded-lg border border-white/10 bg-slate-900 shadow-2xl text-left">
           {loggedIn ? (
             <>
+              <button className="w-full text-left px-4 py-2 hover:bg-slate-800" onClick={() => { setOpen(false); navigate('/planner'); }}>Planner</button>
+              <button className="w-full text-left px-4 py-2 hover:bg-slate-800" onClick={() => { setOpen(false); navigate('/planner/results'); }}>Results</button>
               <button className="w-full text-left px-4 py-2 hover:bg-slate-800" onClick={() => { setOpen(false); navigate('/profile'); }}>Profile</button>
               <button className="w-full text-left px-4 py-2 hover:bg-slate-800" onClick={() => { setOpen(false); navigate('/settings'); }}>Settings</button>
               <button className="w-full text-left px-4 py-2 hover:bg-slate-800" onClick={() => { localStorage.removeItem('loggedInAccount'); setOpen(false); navigate('/'); window.dispatchEvent(new Event('login-status')); }}>Logout</button>
             </>
           ) : (
             <>
+              <button className="w-full text-left px-4 py-2 hover:bg-slate-800" onClick={() => { setOpen(false); navigate('/planner'); }}>Planner</button>
+              <button className="w-full text-left px-4 py-2 hover:bg-slate-800" onClick={() => { setOpen(false); navigate('/planner/results'); }}>Results</button>
               <button className="w-full text-left px-4 py-2 hover:bg-slate-800" onClick={() => { setOpen(false); navigate('/login'); }}>Login</button>
               <button className="w-full text-left px-4 py-2 hover:bg-slate-800" onClick={() => { setOpen(false); navigate('/settings'); }}>Settings</button>
             </>
@@ -120,15 +124,16 @@ function Header() {
 function Footer() {
   return (
     <footer className="border-t border-white/5 bg-slate-950/80 px-4 py-8 text-sm text-slate-400">
-      <div className="mx-auto flex max-w-4xl flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-col gap-2 text-slate-400 text-sm font-medium">
+      <div className="mx-auto flex flex-col items-start max-w-4xl gap-6 sm:flex-row sm:items-center sm:justify-between">
+        {/* On mobile: stack & align left. On sm+: flex-row as before */}
+        <div className="flex flex-col gap-2 text-slate-400 text-sm font-medium items-start w-full">
           <span>Flygelgatan 4</span>
           <span>073*******</span>
           <span>Antebrinken@live.se</span>
         </div>
 
         {/* Socials (center) */}
-        <div className="flex flex-row justify-center gap-6 py-2">
+        <div className="flex flex-row gap-6 py-2 items-center w-full pl-0 justify-start">
           {/* Instagram */}
           <a href="https://instagram.com/" target="_blank" rel="noopener noreferrer" title="Instagram" className="hover:scale-110 transition">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
@@ -154,7 +159,7 @@ function Footer() {
           </a>
         </div>
 
-        <div className="flex flex-col gap-2 items-end sm:items-end text-slate-400 text-sm font-medium text-right">
+        <div className="flex flex-col gap-2 items-start text-slate-400 text-sm font-medium w-full">
           <Link className="hover:text-white" to="/planner">
             Planner
           </Link>
