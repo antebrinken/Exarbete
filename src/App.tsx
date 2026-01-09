@@ -7,6 +7,10 @@ import { Link, NavLink, Route, Routes, useLocation, useNavigate } from 'react-ro
 import { generateTravelPlan } from './services/api'
 import type { TravelFormData } from './types/forms'
 import LoginForm from './LoginForm';
+import SettingsPage from './SettingsPage';
+import ChangePasswordPage from './ChangePasswordPage';
+import DeleteAccountPage from './DeleteAccountPage';
+import NotificationsPage from './NotificationsPage';
 import "leaflet/dist/leaflet.css";
 import MapView from './MapView';
 
@@ -75,9 +79,6 @@ function Header() {
     <header className="border-b border-white/5 bg-slate-950/70 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
         <Link to="/" className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-base font-semibold">
-            TP
-          </div>
           <div>
             <p className="text-lg font-bold text-indigo-200/80">
               Travel Planner
@@ -121,10 +122,38 @@ function Footer() {
     <footer className="border-t border-white/5 bg-slate-950/80 px-4 py-8 text-sm text-slate-400">
       <div className="mx-auto flex max-w-4xl flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-2 text-slate-400 text-sm font-medium">
-          <span>Adress: Flygelgatan 4</span>
-          <span>Phone nr: 073*******</span>
-          <span>Philip Antebrink</span>
+          <span>Flygelgatan 4</span>
+          <span>073*******</span>
+          <span>Antebrinken@live.se</span>
         </div>
+
+        {/* Socials (center) */}
+        <div className="flex flex-row justify-center gap-6 py-2">
+          {/* Instagram */}
+          <a href="https://instagram.com/" target="_blank" rel="noopener noreferrer" title="Instagram" className="hover:scale-110 transition">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <rect width="24" height="24" rx="6" fill="#E4405F"/>
+              <path d="M7.75 6C6.50736 6 5.5 7.00736 5.5 8.25V15.75C5.5 16.9926 6.50736 18 7.75 18H16.25C17.4926 18 18.5 16.9926 18.5 15.75V8.25C18.5 7.00736 17.4926 6 16.25 6H7.75ZM12 9C13.6569 9 15 10.3431 15 12C15 13.6569 13.6569 15 12 15C10.3431 15 9 13.6569 9 12C9 10.3431 10.3431 9 12 9ZM17 8C17.2761 8 17.5 8.22386 17.5 8.5C17.5 8.77614 17.2761 9 17 9C16.7239 9 16.5 8.77614 16.5 8.5C16.5 8.22386 16.7239 8 17 8ZM12 10.25C11.0335 10.25 10.25 11.0335 10.25 12C10.25 12.9665 11.0335 13.75 12 13.75C12.9665 13.75 13.75 12.9665 13.75 12C13.75 11.0335 12.9665 10.25 12 10.25Z" fill="white"/>
+            </svg>
+          </a>
+
+          {/* Github */}
+          <a href="https://github.com/" target="_blank" rel="noopener noreferrer" title="Github" className="hover:scale-110 transition">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="12" fill="#181717"/>
+              <path d="M12 6C8.686 6 6 8.686 6 12c0 2.654 1.721 4.904 4.106 5.699.3.056.41-.13.41-.288 0-.142-.005-.518-.008-1.017-1.671.363-2.023-.807-2.023-.807-.273-.694-.668-.879-.668-.879-.545-.372.041-.365.041-.365.602.043.919.62.919.62.536.92 1.407.654 1.75.501.054-.388.21-.654.382-.805-1.334-.15-2.737-.667-2.737-2.97 0-.656.234-1.192.619-1.612-.063-.151-.269-.76.059-1.584 0 0 .504-.162 1.653.617a5.753 5.753 0 0 1 1.506-.203c.51.002 1.025.069 1.506.203 1.149-.779 1.652-.617 1.652-.617.329.824.123 1.433.06 1.584.386.42.618.956.618 1.612 0 2.308-1.406 2.818-2.744 2.965.216.187.409.555.409 1.119 0 .808-.007 1.459-.007 1.658 0 .159.108.346.413.287C16.281 16.902 18 14.652 18 12c0-3.314-2.686-6-6-6z" fill="white"/>
+            </svg>
+          </a>
+
+          {/* LinkedIn */}
+          <a href="https://linkedin.com/" target="_blank" rel="noopener noreferrer" title="LinkedIn" className="hover:scale-110 transition">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <rect width="24" height="24" rx="6" fill="#0077B5"/>
+              <path d="M8.672 17H6.208V10.48h2.464V17zM7.44 9.472c-.777 0-1.256-.52-1.256-1.168 0-.657.488-1.166 1.28-1.166.793 0 1.257.51 1.265 1.167 0 .648-.472 1.167-1.28 1.167zm7.545 7.528h-2.464v-3.07c0-.771-.276-1.297-.968-1.297-.528 0-.842.355-.981.697-.051.123-.064.295-.064.467V17h-2.463c.032-5.545 0-6.52 0-6.52h2.464v.888c.327-.505.91-1.224 2.217-1.224 1.617 0 2.834 1.057 2.834 3.326V17z" fill="white"/>
+            </svg>
+          </a>
+        </div>
+
         <div className="flex flex-col gap-2 items-end sm:items-end text-slate-400 text-sm font-medium text-right">
           <Link className="hover:text-white" to="/planner">
             Planner
@@ -786,6 +815,10 @@ function App() {
         <Route path="/shared/:id" element={<RemoteResultsPage />} />
         <Route path="/login" element={<LoginForm />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/settings/change-password" element={<ChangePasswordPage />} />
+        <Route path="/settings/delete-account" element={<DeleteAccountPage />} />
+        <Route path="/settings/notifications" element={<NotificationsPage />} />
       </Routes>
       <Footer />
     </div>

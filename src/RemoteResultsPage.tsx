@@ -12,7 +12,7 @@ export default function RemoteResultsPage() {
   const [selectedActivityId, setSelectedActivityId] = useState<string | null>(null);
 
   useEffect(() => {
-    setLoading(true);
+    Promise.resolve().then(() => setLoading(true));
     fetch(`/api/shared-trips/${id}`)
       .then(r => {
         if (!r.ok) throw new Error("Resan finns inte eller kunde inte laddas.");
@@ -36,8 +36,8 @@ export default function RemoteResultsPage() {
       <div className="mb-8">
         <MapView
           center={plan.days.find(d=>d.activities.some(a=>a.lat && a.lng))?.activities.find(a=>a.lat && a.lng)?.lat ?[
-            plan.days.find(d=>d.activities.some(a=>a.lat && a.lng))?.activities.find(a=>a.lat && a.lng)?.lat!,
-            plan.days.find(d=>d.activities.some(a=>a.lat && a.lng))?.activities.find(a=>a.lat && a.lng)?.lng!
+            plan.days.find(d => d.activities.some(a => typeof a.lat === 'number' && typeof a.lng === 'number'))?.activities.find(a => typeof a.lat === 'number' && typeof a.lng === 'number')?.lat ?? 0,
+            plan.days.find(d => d.activities.some(a => typeof a.lat === 'number' && typeof a.lng === 'number'))?.activities.find(a => typeof a.lat === 'number' && typeof a.lng === 'number')?.lng ?? 0
           ] : [0,0]}
           markers={plan.days.flatMap(day => day.activities.filter(a => typeof a.lat === 'number' && typeof a.lng === 'number').map(a => ({
             id: a.id,

@@ -33,7 +33,7 @@ function FlyToSelected({ center }: { center: [number, number] }) {
   const map = useMap();
   React.useEffect(() => {
     map.flyTo(center, map.getZoom(), { duration: 0.8 });
-  }, [center]);
+  }, [center, map]);
   return null;
 }
 
