@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import SharedTripPage from './SharedTripPage'
+import ReactDatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import PrintTripPage from './PrintTripPage'
 import RemoteResultsPage from './RemoteResultsPage'
 import type { FormEvent } from 'react'
@@ -196,6 +198,8 @@ function HomePage() {
 
 function PlannerPage() {
   const navigate = useNavigate()
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -207,8 +211,8 @@ function PlannerPage() {
 
     const payload: TravelFormData = {
       destination: String(form.get('destination') ?? ''),
-      startDate: String(form.get('startDate') ?? ''),
-      endDate: String(form.get('endDate') ?? ''),
+      startDate,
+      endDate,
       budget: (form.get('budget') as TravelFormData['budget']) ?? 'mid',
       interests,
       travelers: form.get('travelers') ? String(form.get('travelers')) : undefined,
@@ -276,31 +280,35 @@ function PlannerPage() {
               <label className="text-sm font-semibold text-white" htmlFor="startDate">
                 Start date <span className="text-xs text-slate-400">yyyy-mm-dd</span>
               </label>
-<input
-   id="startDate"
-   name="startDate"
-   type="text"
-   placeholder="yyyy-mm-dd"
-   pattern="\\d{4}-\\d{2}-\\d{2}"
-   title="Enter date in yyyy-mm-dd format"
-   className="w-full rounded-lg border border-white/10 bg-slate-900/80 px-3 py-2 text-sm text-white focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/40"
-   required
- />
+<ReactDatePicker
+  id="startDate"
+  name="startDate"
+  selected={startDate ? new Date(startDate) : null}
+  onChange={(date: Date | null) => setStartDate(date ? date.toISOString().slice(0, 10) : '')}
+  dateFormat="yyyy-MM-dd"
+  placeholderText="yyyy-mm-dd"
+  className="w-full rounded-lg border border-white/10 bg-slate-900/80 px-3 py-2 text-sm text-white focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/40"
+  required
+  autoComplete="off"
+/>
+
             </div>
             <div className="space-y-2">
               <label className="text-sm font-semibold text-white" htmlFor="endDate">
                 End date <span className="text-xs text-slate-400">yyyy-mm-dd</span>
               </label>
-<input
-   id="endDate"
-   name="endDate"
-   type="text"
-   placeholder="yyyy-mm-dd"
-   pattern="\\d{4}-\\d{2}-\\d{2}"
-   title="Enter date in yyyy-mm-dd format"
-   className="w-full rounded-lg border border-white/10 bg-slate-900/80 px-3 py-2 text-sm text-white focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/40"
-   required
- />
+<ReactDatePicker
+  id="endDate"
+  name="endDate"
+  selected={endDate ? new Date(endDate) : null}
+  onChange={(date: Date | null) => setEndDate(date ? date.toISOString().slice(0, 10) : '')}
+  dateFormat="yyyy-MM-dd"
+  placeholderText="yyyy-mm-dd"
+  className="w-full rounded-lg border border-white/10 bg-slate-900/80 px-3 py-2 text-sm text-white focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/40"
+  required
+  autoComplete="off"
+/>
+
             </div>
             <div className="space-y-2 sm:col-span-2">
               <p className="text-sm font-semibold text-white">
