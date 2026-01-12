@@ -15,7 +15,7 @@ export default function ChangePasswordPage() {
     acc.password = newPassword;
     // Update accounts in localStorage too
     let accounts = JSON.parse(localStorage.getItem('accounts') || '[]');
-    accounts = accounts.map(a => a.email === acc.email ? {...a, password: newPassword } : a);
+    accounts = accounts.map((a: { email: string; password: string }) => a.email === acc.email ? {...a, password: newPassword } : a);
     localStorage.setItem('accounts', JSON.stringify(accounts));
     localStorage.setItem('loggedInAccount', JSON.stringify(acc));
     setMessage('Password changed successfully.');

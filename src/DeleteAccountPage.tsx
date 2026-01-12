@@ -17,7 +17,7 @@ export default function DeleteAccountPage() {
     if (!accStr) return setMessage('Not logged in.');
     const acc = JSON.parse(accStr);
     let accounts = JSON.parse(localStorage.getItem('accounts') || '[]');
-    accounts = accounts.filter(a => a.email !== acc.email);
+    accounts = accounts.filter((a: { email: string }) => a.email !== acc.email);
     localStorage.setItem('accounts', JSON.stringify(accounts));
     localStorage.removeItem('loggedInAccount');
     setMessage('Account deleted.');
